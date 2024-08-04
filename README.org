@@ -2,11 +2,29 @@
 
 This is a [[https://github.com/doomemacs/doomemacs][doom emacs]] configuration of how to use emacs with language server in devcontainer.
 
-
 - use [[https://github.com/manateelazycat/lsp-bridge][lsp-bridge]] as the LSP client
-- use [[https://github.com/nohzafk/devcontainer-feature-emacs-lsp-bridge][devcontainer feature]] to install lsp-bridge and the language server inside the container
+- use [[https://github.com/nohzafk/devcontainer-feature-emacs-lsp-bridge][devcontainer-feature-emacs-lsp-bridge]] to install lsp-bridge and the language server inside the container
 - creation of the devcontainer is delegated to VSCode with [[https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers][Dev Containers Extension]]
 
+** status of devcontainer support
+
+Currently I'm the main contributor of lsp-bridge's devcontainer support. 
+Here I trace the features that I'd like to add, and what I've done for Emacs to work with devcontainer.
+
+- DONE devcontainer-feature able to install lsp-bridge
+- DONE devcontainer-feature able to install any language server that lsp-bridge supports. (Consider it's done, while a few language servers are missing at Nixpkgs or require special setting, also language server which runs on Windows is not supported)
+- DONE lsp-bridge open container file using =find-file= /docker:
+- DONE lsp-bridge enable auto-completion
+- DINE lsp-bridge save file by =lsp-bridge-remote-save-buffer=
+- DONE lsp-bridge format buffer using =apheleia=
+- DONE lsp-bridge jump to definition and jump back
+- DONE doom-emacs ripgrep search in container
+- DONE doom-emacs open vTerm with =bash= in container
+
+- TBD  devcontainer-feature add instructions of how to setup emacs to work with =Python= projects in devcontainer
+- TBD  lsp-bridge auto re-connect to the new container and re-open file if devcontainer has been rebuilt
+- TBD  devcontainer manage container in Emacs with =CLI2ELI=
+- TBD  devcontainer get rid of VSCode for using lsp-bridge in devcontainer, currently VSCode is needed as port forward is not implemented by =devcontainer CLI=. POC at [[https://github.com/nohzafk/devcontainer-cli-port-forwarder][devcontainer-cli-port-forwarder]]
 
 * Remote Editing Configuration
 ** TRAMP
@@ -28,7 +46,18 @@ Add this to your [[https://code.visualstudio.com/docs/devcontainers/create-dev-c
 }
 #+end_src
 
-use it to install any other tools that you want to use in the container.
+use nix to install tools that you want to use in the container.
+
+** tramp-remote-path
+Ensure that =~/.nix-profile/bin= is included in the =PATH= when executing remote commands.
+
+#+begin_src elisp :tangle config.el
+(after! tramp
+  (add-to-list 'tramp-remote-path "~/.nix-profile/bin")
+  (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
+#+end_src
+
+this will make search tools such as =ripgrep.el= and =projectile-ripgrep= works with remote files.
 
 ** lsp-bridge
 #+begin_src elisp :tangle packages.el
@@ -67,16 +96,6 @@ use it to install any other tools that you want to use in the container.
       "M-p" #'flymake-goto-prev-error)
 #+end_src
 
-** tramp-remote-path
-Ensure that =~/.nix-profile/bin= is included in the =PATH= when executing remote commands.
-
-#+begin_src elisp :tangle config.el
-(after! tramp
-  (add-to-list 'tramp-remote-path "~/.nix-profile/bin")
-  (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
-#+end_src
-
-this will make search tools such as =ripgrep.el= and =projectile-ripgrep= work correctly.
 
 ** formatter support
 Enable =format= feature in =init.el=, it will install the =apheleia= package.
@@ -112,6 +131,7 @@ Add a sticky header to indicate editing remote file
 #+end_src
 
 ** vTerm
+Enable =vterm= feature in =init.el=
 
 use =/bin/bash= for vterm when editing container file, use =SPC o t= to open vTerm buffer
 
