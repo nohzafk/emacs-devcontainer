@@ -22,7 +22,7 @@ Here I trace the features that I'd like to add, and what I've done for Emacs to 
 - DONE doom-emacs: open vTerm with =bash= in container
 
 - TBD  devcontainer-feature: add instructions of how to setup emacs to work with =Python= projects in devcontainer
-- TBD  devcontainer: manage container in Emacs with =CLI2ELI=
+- TBD  devcontainer: manage container in Emacs with [[https://github.com/nohzafk/cli2eli][CLI2ELI]]
 - TBD  devcontainer: get rid of VSCode for using lsp-bridge in devcontainer, currently VSCode is needed as port forward is not implemented by =devcontainer CLI=. POC at [[https://github.com/nohzafk/devcontainer-cli-port-forwarder][devcontainer-cli-port-forwarder]]
 - TBD  lsp-bridge: auto re-connect to the new container and re-open file if devcontainer has been rebuilt
 
