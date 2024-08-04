@@ -1,0 +1,130 @@
+* Emacs with LSP in Devcontainer
+
+This is a [[https://github.com/doomemacs/doomemacs][doom emacs]] configuration of how to use emacs with language server in devcontainer.
+
+
+- use [[https://github.com/manateelazycat/lsp-bridge][lsp-bridge]] as the LSP client
+- use [[https://github.com/nohzafk/devcontainer-feature-emacs-lsp-bridge][devcontainer feature]] to install lsp-bridge and the language server inside the container
+- creation of the devcontainer is delegated to VSCode with [[https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers][Dev Containers Extension]]
+
+
+* Remote Editing Configuration
+** TRAMP
+- Use =M-x tramp-cleanup-all-connections= to remove all cached connection history.
+- Use =M-x tramp-cleanup-all-buffers= to close all remote buffers.
+
+** install additional tools
+To install additional tools like =ripgrep= in a devcontainer, you can use the =features/nix=.
+
+Add this to your [[https://code.visualstudio.com/docs/devcontainers/create-dev-container][devcontainer.json]],
+
+#+begin_src json :tangle no
+{
+  "features": {
+    "ghcr.io/devcontainers/features/nix:1": {
+       "packages": "ripgrep"
+    }
+  }
+}
+#+end_src
+
+use it to install any other tools that you want to use in the container.
+
+** lsp-bridge
+#+begin_src elisp :tangle packages.el
+(when (package! lsp-bridge
+        :recipe (:host github
+                 :repo "manateelazycat/lsp-bridge"
+                 :branch "master"
+                 :files ("*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
+                 :build (:not compile)))
+  ;; doom-emacs has mardown-mode
+  ;; (package! markdown-mode)
+  (package! yasnippet)
+  (package! topsy)
+  (package! flymake-bridge
+    :recipe (:host github :repo "liuyinz/flymake-bridge" :branch "master")))
+#+end_src
+#+begin_src elisp :tangle config.el
+(use-package! lsp-bridge
+  :config
+
+  ;; for muscle memory to save buffer
+  (defun my/save-buffer ()
+  (interactive)
+  (if lsp-bridge-remote-file-flag
+      (call-interactively #'lsp-bridge-remote-save-buffer)
+    (call-interactively #'save-buffer)))
+
+  (map! "C-x C-s" #'my/save-buffer))
+
+(use-package! flymake-bridge
+  :after lsp-bridge
+  :hook (lsp-bridge-mode . flymake-bridge-setup))
+
+(map! :after flymake
+      "M-n" #'flymake-goto-next-error
+      "M-p" #'flymake-goto-prev-error)
+#+end_src
+
+** tramp-remote-path
+Ensure that =~/.nix-profile/bin= is included in the =PATH= when executing remote commands.
+
+#+begin_src elisp :tangle config.el
+(after! tramp
+  (add-to-list 'tramp-remote-path "~/.nix-profile/bin")
+  (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
+#+end_src
+
+this will make search tools such as =ripgrep.el= and =projectile-ripgrep= work correctly.
+
+** formatter support
+Enable =format= feature in =init.el=, it will install the =apheleia= package.
+
+use =SPC c f= to format the buffer.
+
+#+begin_src elisp :tangle config.el
+(use-package! apheleia
+  :after lsp-bridge
+  :config
+  ;; don't mess up with lsp-mode
+  (setq +format-with-lsp nil)
+  (setq apheleia-remote-algorithm 'remote))
+#+end_src
+
+** remote file indicator
+
+Add a sticky header to indicate editing remote file
+
+#+begin_src elisp :tangle config.el
+(use-package! topsy
+  :after lsp-bridge
+  :config
+  ;; display a bar to remind editing remote file
+  (setcdr (assoc nil topsy-mode-functions)
+          (lambda ()
+            (when (lsp-bridge-is-remote-file) "[LBR] REMOTE FILE")))
+
+  ;; do not activate when the current major mode is org-mode
+  (add-hook 'lsp-bridge-mode-hook (lambda ()
+                                    (unless (derived-mode-p 'org-mode)
+                                      (topsy-mode 1)))))
+#+end_src
+
+** vTerm
+
+use =/bin/bash= for vterm when editing container file, use =SPC o t= to open vTerm buffer
+
+#+begin_src elisp :tangle config.el
+(after! vterm
+  (defun my/set-vterm-shell ()
+    (when (string-prefix-p "/docker:" (file-remote-p default-directory))
+      (when (eq major-mode 'vterm-mode)
+        (let ((shell (if (string-prefix-p "/docker:" (file-remote-p default-directory))
+                         "/bin/bash"
+                       (or (getenv "SHELL") "/bin/bash"))))
+          (vterm-send-string (format "exec %s\n" shell))
+          (vterm-send-string "clear\n")))))
+
+  (add-hook 'vterm-mode-hook #'my/set-vterm-shell))
+#+end_src
