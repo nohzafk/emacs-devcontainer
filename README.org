@@ -80,10 +80,10 @@ this will make search tools such as =ripgrep.el= and =projectile-ripgrep= works 
 
   ;; for muscle memory to save buffer
   (defun my/save-buffer ()
-  (interactive)
-  (if lsp-bridge-remote-file-flag
-      (call-interactively #'lsp-bridge-remote-save-buffer)
-    (call-interactively #'save-buffer)))
+    (interactive)
+    (if lsp-bridge-remote-file-flag
+        (call-interactively #'lsp-bridge-remote-save-buffer)
+      (call-interactively #'save-buffer)))
 
   (map! "C-x C-s" #'my/save-buffer))
 
