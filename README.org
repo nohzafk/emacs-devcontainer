@@ -15,7 +15,7 @@ Here I trace the features that I'd like to add, and what I've done for Emacs to 
 - DONE devcontainer-feature: able to install any language server that lsp-bridge supports. (Consider it's done, while a few language servers are missing at Nixpkgs or require special setting, also language server which runs on Windows is not supported)
 - DONE lsp-bridge: open container file using =find-file= /docker:
 - DONE lsp-bridge: enable auto-completion
-- DINE lsp-bridge: save file by =lsp-bridge-remote-save-buffer=
+- DONE lsp-bridge: save file by =lsp-bridge-remote-save-buffer=
 - DONE lsp-bridge: format buffer using =apheleia=
 - DONE lsp-bridge: jump to definition and jump back
 - DONE doom-emacs: ripgrep search in container
