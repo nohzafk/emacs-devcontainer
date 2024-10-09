@@ -14,6 +14,7 @@ Currently I'm the main contributor of lsp-bridge's devcontainer support. Here I 
 |--------+----------------------+----------------------------------------------------------------------------------------|
 | DONE   | devcontainer-feature | able to install lsp-bridge                                                             |
 | DONE   | devcontainer-feature | able to install any language server that lsp-bridge supports [1]                       |
+| DONE   | devcontainer-feature | daily auto update latest version of lsp-bridge and release                             |
 | DONE   | lsp-bridge           | open container file using =find-file= /docker:                                         |
 | DONE   | lsp-bridge           | enable auto-completion                                                                 |
 | DONE   | lsp-bridge           | save file by =lsp-bridge-remote-save-buffer=                                           |
