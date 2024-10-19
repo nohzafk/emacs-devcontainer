@@ -15,15 +15,15 @@ Currently I'm the main contributor of lsp-bridge's devcontainer support. Here I 
 | DONE   | devcontainer-feature | able to install lsp-bridge                                                             |
 | DONE   | devcontainer-feature | able to install any language server that lsp-bridge supports [1]                       |
 | DONE   | devcontainer-feature | daily auto update latest version of lsp-bridge and release                             |
-| DONE   | lsp-bridge           | open container file using =find-file= /docker:                                         |
+| DONE   | lsp-bridge           | open container file using =find-file= /docker:                                           |
 | DONE   | lsp-bridge           | enable auto-completion                                                                 |
-| DONE   | lsp-bridge           | save file by =lsp-bridge-remote-save-buffer=                                           |
-| DONE   | lsp-bridge           | format buffer using =apheleia=                                                         |
+| DONE   | lsp-bridge           | save file by =lsp-bridge-remote-save-buffer=                                             |
+| DONE   | lsp-bridge           | format buffer using =apheleia=                                                           |
 | DONE   | lsp-bridge           | jump to definition and jump back                                                       |
 | DONE   | doom-emacs           | ripgrep search in container                                                            |
-| DONE   | doom-emacs           | open vTerm with =bash= in container                                                    |
-| TBD    | devcontainer-feature | instructions of how to setup with =Python= projects                                    |
-| TBD    | devcontainer         | manage container in Emacs with [[https://github.com/nohzafk/cli2eli][CLI2ELI]]         |
+| DONE   | doom-emacs           | open vTerm with =bash= in container                                                      |
+| DONE   | devcontainer-feature | instructions of how to setup with =Python= projects                                      |
+| TBD    | devcontainer         | manage container in Emacs with [[https://github.com/nohzafk/cli2eli][CLI2ELI]]                                                 |
 | TBD    | devcontainer         | get rid of VSCode [2]                                                                  |
 | TBD    | lsp-bridge           | auto re-connect to the new container and re-open file if devcontainer has been rebuilt |
 
@@ -101,7 +101,6 @@ this will make search tools such as =ripgrep.el= and =projectile-ripgrep= works 
       "M-p" #'flymake-goto-prev-error)
 #+end_src
 
-
 ** formatter support
 Enable =format= feature in =init.el=, it will install the =apheleia= package.
 
@@ -152,4 +151,20 @@ use =/bin/bash= for vterm when editing container file, use =SPC o t= to open vTe
           (vterm-send-string "clear\n")))))
 
   (add-hook 'vterm-mode-hook #'my/set-vterm-shell))
+#+end_src
+
+** how to setup language server for python project (using basedpyright)
+It should be clearly stated to avoid any confusing that lsp-bridge itself runs
+in a python process, and basedpyright-langserver uses another python process.
+
+Normally you created a virtual environment using tools like *uv* or *pdm* at the
+root directory, suppose the name of the virtual environment is ".venv".
+
+You need to add a section to the *pyproject.toml*, and basedpyright will inspect
+the virtual environment correctly, [[https://docs.basedpyright.com/latest/configuration/config-files/][more details]].
+
+#+begin_src toml
+[tool.basedpyright]
+venvPath = "."
+venv = ".venv"
 #+end_src
